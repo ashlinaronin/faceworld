@@ -1,3 +1,5 @@
+//TODO: figure out why libs.js is so much bigger than the two files ostensibly in it...
+
 var gulp = require('gulp');
 var $ = require('gulp-load-plugins')();
 var browserSync = require('browser-sync');
@@ -52,15 +54,29 @@ gulp.task('dev:main-scripts', function() {
       .pipe(reload({stream: true}));
 });
 
+
 gulp.task('dev:lib-scripts', function(){
     return gulp.src([
-        'node_modules/angular/angular.js',
+        'node_modules/angular/angular.min.js',
         'lib/three.js'
-       ],
-        {base: 'node_modules/'})
+    ])
       .pipe($.plumber())
       .pipe($.sourcemaps.init())
       .pipe($.concat('lib.js'))
+      .pipe($.sourcemaps.write())
+      .pipe(gulp.dest('dist/scripts'))
+      .pipe(reload({stream: true}));
+});
+
+gulp.task('prod:lib-scripts', function(){
+    return gulp.src([
+        'node_modules/angular/angular.js',
+        'lib/three.js'
+       ])
+      .pipe($.plumber())
+      .pipe($.sourcemaps.init())
+      .pipe($.concat('lib.js'))
+      .pipe($.uglify())
       .pipe($.sourcemaps.write())
       .pipe(gulp.dest('dist/scripts'))
       .pipe(reload({stream: true}));
@@ -100,7 +116,7 @@ gulp.task('lint:test', lint('test/spec/**/*.js', testLintOptions));
 
 gulp.task('clean', del.bind(null, ['dist']));
 
-gulp.task('serve', ['dev:lib-scripts', 'dev:styles', 'dev:images', 'dev:main-scripts', 'dev:index-html', 'dev:views'], () => {
+gulp.task('serve', ['dev:lib-scripts', 'dev:styles', 'dev:images', 'dev:main-scripts', 'dev:index-html', 'dev:views'], function() {
     browserSync({
         notify: false,
         port: 4000,
@@ -123,3 +139,5 @@ gulp.task('build', [], function(){
 gulp.task('default', ['clean'], function(){
     gulp.start('serve');
 });
+
+gulp.task('prod', ['prod:lib-scripts', 'dev:styles', 'dev:images', 'dev:main-scripts', 'dev:index-html', 'dev:views']);

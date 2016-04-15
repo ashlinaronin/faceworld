@@ -48,7 +48,6 @@
             function animate() {
                 window.requestAnimationFrame(animate);
                 WebcamService.drawVideoFrame();
-
                 components.renderer.render(components.scene, components.camera);
             }
 
