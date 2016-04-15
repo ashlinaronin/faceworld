@@ -1,9 +1,15 @@
-var video = document.getElementById('webcam');
-var canvas = document.getElementById('selfie-canvas');
-var context = canvas.getContext('2d');
-var snapshot = document.getElementById('snapshot');
+var video, canvas, context;
 
+//createElements();
+createElements();
 initWebcam();
+
+function createElements() {
+    // None of these elements are in the DOM
+    canvas = document.createElement('canvas');
+    context = canvas.getContext('2d');
+    video = document.createElement('video');
+}
 
 function initWebcam() {
     navigator.getUserMedia = (navigator.getUserMedia ||
@@ -17,16 +23,23 @@ function initWebcam() {
 
 function onWebcamSuccess(stream) {
     video.src = window.URL.createObjectURL(stream);
-    video.onloadedmetadata = function(e) {
+
+    video.addEventListener('canplay', function() {
         video.play();
-    }
+        setTimeout(function() {
+            takePic(function(dataUrl) {
+                updateSphereMap(dataUrl);
+            });
+        }, 100);
+
+    });
 }
 
 function onWebcamError(e) {
     console.log('sorry: ', e);
 }
 
-function takePic(stream, cb) {
+function takePic(cb) {
     // Video height and width aren't available until the stream starts, so
     // we grab em here
     canvas.width = video.videoWidth;
