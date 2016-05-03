@@ -9,8 +9,9 @@
 
         function Asteroids($q, LoadingManagerService) {
 
-            var asteroidsDeferred = $q.defer();
-            var asteroids = [];
+            var allAsteroidsDeferred = $q.defer();
+            // var asteroids = [];
+            var asteroidPromises = [];
             var asteroidMaterial = new THREE.MeshPhongMaterial(0xffffff);
             var objLoader;
 
@@ -20,8 +21,10 @@
                 _createAsteroids(10, 40);
             });
 
-
+            // Create asteroid and return a promise
             function _createAsteroid(geometryUrl, size, position) {
+                var asteroidDeferred = $q.defer();
+
                 objLoader.load(geometryUrl, function(object) {
                     object.traverse(function(child) {
                         if (child instanceof THREE.Mesh) {
@@ -30,8 +33,11 @@
                     });
                     object.scale.set(size, size, size);
                     object.position.copy(position);
-                    asteroids.push(object);
+
+                    asteroidDeferred.resolve(object);
                 });
+
+                return asteroidDeferred.promise;
             }
 
             function _createAsteroids(number, maxSize) {
@@ -43,11 +49,15 @@
 
                     var size = _getRandomInt(1, 5);
 
-                    _createAsteroid('assets/asteroids/' + i + '.obj', size, position);
+                    var asteroidPromise = _createAsteroid('assets/asteroids/' + i + '.obj', size, position);
+                    asteroidPromises.push(asteroidPromise);
                 }
 
-                // resolve asteroids promise with asteroids after creating them
-                asteroidsDeferred.resolve(asteroids);
+                $q.all(asteroidPromises).then(function(resolved) {
+                    // Resolve all asteroids promise with asteroids once we're
+                    // sure they've all been created
+                    allAsteroidsDeferred.resolve(resolved);
+                });
             }
 
             /* Return a random integer between min (inclusive) and max (inclusive).
@@ -59,7 +69,7 @@
 
             return {
                 getAsteroids: function() {
-                    return asteroidsDeferred.promise;
+                    return allAsteroidsDeferred.promise;
                 }
             }
         }
