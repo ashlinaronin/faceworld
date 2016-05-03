@@ -7,11 +7,13 @@
 
         sceneDirective.$inject = [
             '$q', 'CameraService', 'PhotosphereService',
-            'RendererService', 'WebcamService', 'AsteroidsService'
+            'RendererService', 'WebcamService', 'AsteroidsService',
+			'LightsService'
         ];
 
         function sceneDirective($q, CameraService, PhotosphereService,
-                    RendererService, WebcamService, AsteroidsService) {
+                    RendererService, WebcamService, AsteroidsService,
+					LightsService) {
 
             var directive = {
                 link: link,
@@ -30,6 +32,8 @@
                     camera: CameraService.getCamera(),
                     photosphere: PhotosphereService.getPhotosphere(),
                     renderer: RendererService.getRenderer(),
+					pointLight: LightsService.getPointLight(),
+					ambientLight: LightsService.getAmbientLight(),
                     videoTexture: WebcamService.getVideoTexture(),
 					asteroids: AsteroidsService.getAsteroids()
                 }).then(function(resolved) {
@@ -40,16 +44,23 @@
                     components.photosphere.material.map = components.videoTexture;
 
                     components.scene.add(components.photosphere);
+					components.scene.add(components.pointLight);
+					components.scene.add(components.ambientLight);
                     components.scene.add(components.camera);
 
-					addAllAsteroids(components.scene, components.asteroids);
+					addAllAsteroids(components.scene, components.asteroids, components.videoTexture);
 
                     animate();
                 });
             }
 
-			function addAllAsteroids(scene, asteroids) {
+			function addAllAsteroids(scene, asteroids, texture) {
 				asteroids.forEach(function(asteroid) {
+					asteroid.traverse(function(child) {
+                        if (child instanceof THREE.Mesh) {
+                            child.material = texture;
+                        }
+                    });
 					scene.add(asteroid);
 				});
 			}

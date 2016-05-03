@@ -9,17 +9,24 @@
 
         function Asteroids($q, LoadingManagerService) {
 
-            var allAsteroidsDeferred = $q.defer();
-            // var asteroids = [];
-            var asteroidPromises = [];
-            var asteroidMaterial = new THREE.MeshPhongMaterial(0xffffff);
             var objLoader;
-
-            // start loading objs as soon as we have a loading manager
-            LoadingManagerService.getLoadingManager().then(function(manager) {
-                objLoader = new THREE.OBJLoader(manager);
-                _createAsteroids(10, 40);
+            var allAsteroidsDeferred = $q.defer();
+            var asteroidPromises = [];
+            var asteroidMaterial = new THREE.MeshPhongMaterial({
+                specular: 0xffffff,
+                shininess: 1,
+                shading: THREE.SmoothShading
             });
+
+            // Start loading objs as soon as we have a loading manager
+            _startLoading();
+
+            function _startLoading() {
+                LoadingManagerService.getLoadingManager().then(function(manager) {
+                    objLoader = new THREE.OBJLoader(manager);
+                    _createAsteroids(10, 80);
+                });
+            }
 
             // Create asteroid and return a promise
             function _createAsteroid(geometryUrl, size, position) {
@@ -42,12 +49,12 @@
 
             function _createAsteroids(number, maxSize) {
                 for (var i = 0; i < number; i++) {
-                    var x = _getRandomInt(0, maxSize);
-                    var y = _getRandomInt(0, maxSize);
-                    var z = _getRandomInt(0, maxSize);
+                    var x = _getRandomInt(-maxSize, maxSize);
+                    var y = _getRandomInt(-maxSize, maxSize);
+                    var z = _getRandomInt(-maxSize, maxSize);
                     var position = new THREE.Vector3(x, y, z);
 
-                    var size = _getRandomInt(1, 5);
+                    var size = _getRandomInt(1, 8);
 
                     var asteroidPromise = _createAsteroid('assets/asteroids/' + i + '.obj', size, position);
                     asteroidPromises.push(asteroidPromise);
