@@ -7,11 +7,11 @@
 
         sceneDirective.$inject = [
             '$q', 'CameraService', 'PhotosphereService',
-            'RendererService', 'WebcamService'
+            'RendererService', 'WebcamService', 'AsteroidsService'
         ];
 
         function sceneDirective($q, CameraService, PhotosphereService,
-                    RendererService, WebcamService) {
+                    RendererService, WebcamService, AsteroidsService) {
 
             var directive = {
                 link: link,
@@ -30,7 +30,8 @@
                     camera: CameraService.getCamera(),
                     photosphere: PhotosphereService.getPhotosphere(),
                     renderer: RendererService.getRenderer(),
-                    videoTexture: WebcamService.getVideoTexture()
+                    videoTexture: WebcamService.getVideoTexture(),
+					asteroids: AsteroidsService.getAsteroids()
                 }).then(function(resolved) {
                     // Add all the new resolved components to the components object
                     angular.extend(components, resolved);
@@ -41,9 +42,17 @@
                     components.scene.add(components.photosphere);
                     components.scene.add(components.camera);
 
+					addAllAsteroids(components.scene, components.asteroids);
+
                     animate();
                 });
             }
+
+			function addAllAsteroids(scene, asteroids) {
+				asteroids.forEach(function(asteroid) {
+					scene.add(asteroid);
+				});
+			}
 
             function animate() {
                 window.requestAnimationFrame(animate);

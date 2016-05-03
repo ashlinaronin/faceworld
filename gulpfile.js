@@ -5,6 +5,21 @@ var $ = require('gulp-load-plugins')();
 var browserSync = require('browser-sync');
 var del = require('del');
 
+var paths = {
+    mainScripts: [
+        'src/app.js',
+        'src/**/*.js',
+        'src/**/*Provider.js',
+        'src/**/*Module.js',
+        'src/**/*Route.js',
+        'src/**/*Ctrl.js',
+        'src/**/*Service.js',
+        'src/**/*Directive.js',
+        'src/**/*Filter.js'
+    ],
+    obj: 'src/assets/asteroids/*.obj'
+};
+
 var reload = browserSync.reload;
 
 gulp.task('dev:styles', function() {
@@ -34,18 +49,14 @@ gulp.task('dev:images', function() {
       .pipe(gulp.dest('dist/images'));
 });
 
+gulp.task('dev:obj', function() {
+    return gulp.src(paths.obj)
+    .pipe(gulp.dest('dist/assets/asteroids'))
+    .pipe(reload({stream: true}));
+});
+
 gulp.task('dev:main-scripts', function() {
-    return gulp.src([
-        'src/app.js',
-        'src/**/*.js',
-        'src/**/*Provider.js',
-        'src/**/*Module.js',
-        'src/**/*Route.js',
-        'src/**/*Ctrl.js',
-        'src/**/*Service.js',
-        'src/**/*Directive.js',
-        'src/**/*Filter.js'
-        ])
+    return gulp.src(paths.mainScripts)
       .pipe($.plumber())
       .pipe($.sourcemaps.init())
       .pipe($.concat('main.js'))
@@ -58,7 +69,8 @@ gulp.task('dev:main-scripts', function() {
 gulp.task('dev:lib-scripts', function(){
     return gulp.src([
         'node_modules/angular/angular.min.js',
-        'lib/three.js'
+        'lib/three.js',
+        'lib/OBJLoader.js'
     ])
       .pipe($.plumber())
       .pipe($.sourcemaps.init())
@@ -85,7 +97,7 @@ gulp.task('prod:lib-scripts', function(){
 gulp.task('dev:index-html', function(){
     return gulp.src('src/*.html')
       .pipe(gulp.dest('dist'))
-      .pipe(reload({stream: true}));;
+      .pipe(reload({stream: true}));
 });
 
 gulp.task('dev:views', function() {
@@ -116,17 +128,21 @@ gulp.task('lint:test', lint('test/spec/**/*.js', testLintOptions));
 
 gulp.task('clean', del.bind(null, ['dist']));
 
-gulp.task('serve', ['dev:lib-scripts', 'dev:styles', 'dev:images', 'dev:main-scripts', 'dev:index-html', 'dev:views'], function() {
-    browserSync({
-        notify: false,
-        port: 4000,
-        server: {
-            baseDir: ['dist']
+gulp.task('serve', [
+    'dev:lib-scripts', 'dev:styles', 'dev:obj', 'dev:images',
+    'dev:main-scripts', 'dev:index-html', 'dev:views'],
+    function() {
+        browserSync({
+            notify: false,
+            port: 4000,
+            server: {
+                baseDir: ['dist']
+            }
         }
-    });
+    );
 
     gulp.watch('styles/*.scss', ['dev:styles']);
-    gulp.watch('src/components/**/*.js', ['dev:main-scripts']);
+    gulp.watch(paths.mainScripts, ['dev:main-scripts']);
     gulp.watch('app/assets/images/**/*', ['dev:images']);
     gulp.watch('app/modules/**/*.html', ['dev:views']);
 });
