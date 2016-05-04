@@ -11,6 +11,7 @@
 
             var objLoader;
             var allCactusesDeferred = $q.defer();
+            var bigCactusDeferred = $q.defer();
             var cactusPromises = [];
             var cactusMaterial = new THREE.MeshBasicMaterial({
             	color: 0xffffff,
@@ -23,11 +24,10 @@
             function _startLoading() {
                 LoadingManagerService.getLoadingManager().then(function(manager) {
                     objLoader = new THREE.OBJLoader(manager);
-                    // objLoader.load('assets/cactus.obj', function(object) {
-                    //
-                    // });
 
-                    _createCactuses(10, 80);
+                    // TODO: refactor
+                    _createCactuses(10, 40);
+                    _createBigCactus(160);
                 });
             }
 
@@ -49,6 +49,20 @@
                 });
 
                 return cactusDeferred.promise;
+            }
+
+            function _createBigCactus(size) {
+                objLoader.load('assets/cactus.obj', function(object) {
+                    object.traverse(function(child) {
+                        if (child instanceof THREE.Mesh) {
+                            child.material = cactusMaterial;
+                        }
+                    });
+                    object.scale.set(size, size, size);
+                    object.position.set(0, -220, 0);
+
+                    bigCactusDeferred.resolve(object);
+                });
             }
 
             function _createCactuses(number, maxSize) {
@@ -86,6 +100,9 @@
             return {
                 getCactuses: function() {
                     return allCactusesDeferred.promise;
+                },
+                getOneBigCactus: function() {
+                    return bigCactusDeferred.promise;
                 },
                 rotateCactuses: _rotateCactuses
             }
