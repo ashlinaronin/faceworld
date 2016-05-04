@@ -11,7 +11,7 @@
 
             var photosphereDeferred = $q.defer();
 
-            var sphereGeo = new THREE.SphereGeometry(400,32,32);
+            var sphereGeo = new THREE.SphereGeometry(800,32,32);
             var sphereTex = new THREE.MeshBasicMaterial({
             	color: 0xffffff,
             	side: THREE.BackSide

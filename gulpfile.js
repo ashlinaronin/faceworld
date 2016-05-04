@@ -17,7 +17,7 @@ var paths = {
         'src/**/*Directive.js',
         'src/**/*Filter.js'
     ],
-    obj: 'src/assets/asteroids/*.obj'
+    obj: 'src/assets/**/*.obj'
 };
 
 var reload = browserSync.reload;
@@ -51,7 +51,7 @@ gulp.task('dev:images', function() {
 
 gulp.task('dev:obj', function() {
     return gulp.src(paths.obj)
-    .pipe(gulp.dest('dist/assets/asteroids'))
+    .pipe(gulp.dest('dist/assets/'))
     .pipe(reload({stream: true}));
 });
 

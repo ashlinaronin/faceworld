@@ -12,10 +12,10 @@
             var pointLightDeferred = $q.defer();
             var ambientLightDeferred = $q.defer();
 
-            var pointLight = new THREE.PointLight(0xffffff);
+            var pointLight = new THREE.PointLight(0xffffff, 10);
             pointLightDeferred.resolve(pointLight);
 
-            var ambientLight = new THREE.AmbientLight(0x404040);
+            var ambientLight = new THREE.AmbientLight(0x404040, 10);
             ambientLightDeferred.resolve(ambientLight);
 
             return {

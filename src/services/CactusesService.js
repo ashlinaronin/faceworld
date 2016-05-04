@@ -1,0 +1,97 @@
+(function(){
+	'use strict';
+
+	angular
+        .module('faceworld')
+		.factory('CactusesService', Cactuses);
+
+        Cactuses.$inject = ['$q', 'LoadingManagerService'];
+
+        function Cactuses($q, LoadingManagerService) {
+
+            var objLoader;
+            var allCactusesDeferred = $q.defer();
+            var cactusPromises = [];
+            var cactusMaterial = new THREE.MeshBasicMaterial({
+            	color: 0xffffff,
+            	side: THREE.BackSide
+            });
+
+            // Start loading objs as soon as we have a loading manager
+            _startLoading();
+
+            function _startLoading() {
+                LoadingManagerService.getLoadingManager().then(function(manager) {
+                    objLoader = new THREE.OBJLoader(manager);
+                    // objLoader.load('assets/cactus.obj', function(object) {
+                    //
+                    // });
+
+                    _createCactuses(10, 80);
+                });
+            }
+
+            // Create cactus and return a promise
+            // TODO: SLOW RIGHT NOW WE DONT NEED TO LOAD THIS THING MILLION TIMES
+            function _createCactus(size, position) {
+                var cactusDeferred = $q.defer();
+
+                objLoader.load('assets/cactus.obj', function(object) {
+                    object.traverse(function(child) {
+                        if (child instanceof THREE.Mesh) {
+                            child.material = cactusMaterial;
+                        }
+                    });
+                    object.scale.set(size, size, size);
+                    object.position.copy(position);
+
+                    cactusDeferred.resolve(object);
+                });
+
+                return cactusDeferred.promise;
+            }
+
+            function _createCactuses(number, maxSize) {
+                for (var i = 0; i < number; i++) {
+                    var x = _getRandomInt(-maxSize, maxSize);
+                    var y = _getRandomInt(-maxSize, maxSize);
+                    var z = _getRandomInt(-maxSize, maxSize);
+                    var position = new THREE.Vector3(x, y, z);
+
+                    var size = _getRandomInt(1, 15);
+
+                    var cactusPromise = _createCactus(size, position);
+                    cactusPromises.push(cactusPromise);
+                }
+
+                $q.all(cactusPromises).then(function(resolved) {
+                    // Resolve all cactuses promise with cactuses once we're
+                    // sure they've all been created
+                    allCactusesDeferred.resolve(resolved);
+                });
+            }
+
+            function _rotateCactuses(cactuses) {
+                for (var i = 0; i < cactuses.length; i++) {
+                    cactuses[i].rotation.y += (0.005 * i) + 0.005;
+                }
+            }
+
+            /* Return a random integer between min (inclusive) and max (inclusive).
+            ** Thanks to MDN. */
+            function _getRandomInt(min, max) {
+                return Math.floor(Math.random() * (max - min + 1)) + min;
+            }
+
+            return {
+                getCactuses: function() {
+                    return allCactusesDeferred.promise;
+                },
+                rotateCactuses: _rotateCactuses
+            }
+
+
+
+        }
+
+})();

@@ -12,11 +12,14 @@
             var objLoader;
             var allAsteroidsDeferred = $q.defer();
             var asteroidPromises = [];
-            var asteroidMaterial = new THREE.MeshPhongMaterial({
-                specular: 0xffffff,
-                shininess: 1,
-                shading: THREE.SmoothShading
+            var asteroidMaterial = new THREE.MeshBasicMaterial({
+            	color: 0xffffff,
+            	side: THREE.BackSide
             });
+
+
+
+
 
             // Start loading objs as soon as we have a loading manager
             _startLoading();
@@ -54,7 +57,7 @@
                     var z = _getRandomInt(-maxSize, maxSize);
                     var position = new THREE.Vector3(x, y, z);
 
-                    var size = _getRandomInt(1, 8);
+                    var size = _getRandomInt(1, 15);
 
                     var asteroidPromise = _createAsteroid('assets/asteroids/' + i + '.obj', size, position);
                     asteroidPromises.push(asteroidPromise);
@@ -67,18 +70,27 @@
                 });
             }
 
+            function _rotateAsteroids(asteroids) {
+                for (var i = 0; i < asteroids.length; i++) {
+                    asteroids[i].rotation.y += (0.005 * i) + 0.005;
+                }
+            }
+
             /* Return a random integer between min (inclusive) and max (inclusive).
             ** Thanks to MDN. */
             function _getRandomInt(min, max) {
                 return Math.floor(Math.random() * (max - min + 1)) + min;
             }
 
-
             return {
                 getAsteroids: function() {
                     return allAsteroidsDeferred.promise;
-                }
+                },
+                rotateAsteroids: _rotateAsteroids
             }
+
+
+
         }
 
 })();

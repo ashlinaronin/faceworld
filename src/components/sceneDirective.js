@@ -8,12 +8,12 @@
         sceneDirective.$inject = [
             '$q', 'CameraService', 'PhotosphereService',
             'RendererService', 'WebcamService', 'AsteroidsService',
-			'LightsService'
+			'LightsService', 'SpheresService', 'CactusesService'
         ];
 
         function sceneDirective($q, CameraService, PhotosphereService,
                     RendererService, WebcamService, AsteroidsService,
-					LightsService) {
+					LightsService, SpheresService, CactusesService) {
 
             var directive = {
                 link: link,
@@ -35,12 +35,14 @@
 					pointLight: LightsService.getPointLight(),
 					ambientLight: LightsService.getAmbientLight(),
                     videoTexture: WebcamService.getVideoTexture(),
-					asteroids: AsteroidsService.getAsteroids()
+					asteroids: AsteroidsService.getAsteroids(),
+					cactuses: CactusesService.getCactuses()
+					// spheres: SpheresService.getSpheres()
                 }).then(function(resolved) {
                     // Add all the new resolved components to the components object
                     angular.extend(components, resolved);
 
-                    addMouseMoveListener(components.renderer, components.camera, components.photosphere);
+                    // addMouseMoveListener(components.renderer, components.camera, components.photosphere);
                     components.photosphere.material.map = components.videoTexture;
 
                     components.scene.add(components.photosphere);
@@ -48,26 +50,29 @@
 					components.scene.add(components.ambientLight);
                     components.scene.add(components.camera);
 
-					addAllAsteroids(components.scene, components.asteroids, components.videoTexture);
-
+					addTexturedObjects(components.scene, components.asteroids, components.videoTexture);
+					addTexturedObjects(components.scene, components.cactuses, components.videoTexture);
                     animate();
                 });
             }
 
-			function addAllAsteroids(scene, asteroids, texture) {
-				asteroids.forEach(function(asteroid) {
-					asteroid.traverse(function(child) {
+			function addTexturedObjects(scene, objects, texture) {
+				objects.forEach(function(object) {
+					object.traverse(function(child) {
                         if (child instanceof THREE.Mesh) {
-                            child.material = texture;
+                            child.material.map = texture;
+							child.material.needsUpdate = true;
                         }
                     });
-					scene.add(asteroid);
+					scene.add(object);
 				});
 			}
 
             function animate() {
                 window.requestAnimationFrame(animate);
                 WebcamService.drawVideoFrame();
+				AsteroidsService.rotateAsteroids(components.asteroids);
+				components.camera.rotation.x += 0.001;
                 components.renderer.render(components.scene, components.camera);
             }
 
