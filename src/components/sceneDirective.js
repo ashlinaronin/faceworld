@@ -52,7 +52,7 @@
                     components.scene.add(components.camera);
 					components.scene.add(components.bigCactus);
 					addTexturedObject(components.scene, components.bigCactus, components.videoTexture);
-					addTexturedObjects(components.scene, components.asteroids, components.videoTexture);
+					// addTexturedObjects(components.scene, components.asteroids, components.videoTexture);
 					// addTexturedObjects(components.scene, components.cactuses, components.videoTexture);
                     animate();
                 });
@@ -77,19 +77,28 @@
             function animate() {
                 window.requestAnimationFrame(animate);
                 WebcamService.drawVideoFrame();
-				AsteroidsService.rotateAsteroids(components.asteroids);
-				CactusesService.rotateCactuses(components.cactuses);
+				// AsteroidsService.rotateAsteroids(components.asteroids);
+				// CactusesService.rotateCactuses(components.cactuses);
 				// components.camera.rotation.x += 0.001;
 				// components.camera.position.z -= 0.1;
+				// components.camera.rotation.y += 0.001;
+				components.bigCactus.rotation.y += 0.005;
                 components.renderer.render(components.scene, components.camera);
             }
 
             function addMouseMoveListener(renderer, camera, photosphere) {
                 renderer.domElement.addEventListener('mousemove', function(e){
-                    camera.rotation.x = Math.tan((window.innerHeight/2 - e.y)/(window.innerHeight/2));
-                    photosphere.rotation.y = 4*Math.tan(e.x/window.innerWidth);
+                    // camera.rotation.x = Math.tan((window.innerHeight/2 - e.y)/(window.innerHeight/2));
+					camera.rotation.y = Math.tan((window.innerHeight/2 - e.x)/(window.innerHeight/2));
+					// photosphere.rotation.y = 4*Math.tan(e.x/window.innerWidth);
                 }, false);
             }
+
+			function onWindowResize() {
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+				renderer.setSize(window.innerWidth, window.innerHeight);
+			}
         }
 
 })();

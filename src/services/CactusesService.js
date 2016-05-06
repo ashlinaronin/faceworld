@@ -59,7 +59,7 @@
                         }
                     });
                     object.scale.set(size, size, size);
-                    object.position.set(0, -220, 0);
+                    object.position.set(0, -225, 0);
 
                     bigCactusDeferred.resolve(object);
                 });

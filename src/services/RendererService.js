@@ -17,6 +17,7 @@
                 renderer.setSize(window.innerWidth, window.innerHeight);
                 renderer.domElement.setAttribute('id','renderer');
                 document.body.appendChild(renderer.domElement);
+
                 rendererDeferred.resolve(renderer);
 
 				_addResizeListener();
@@ -27,6 +28,7 @@
 					window.addEventListener('resize', function(){
 	                	rd.domElement.width = window.innerWidth;
 	                	rd.domElement.height = window.innerHeight;
+						renderer.setSize(window.innerWidth, window.innerHeight);
 	                }, false);
 				});
             }
