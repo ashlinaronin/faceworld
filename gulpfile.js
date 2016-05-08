@@ -17,7 +17,7 @@ var paths = {
         'src/**/*Directive.js',
         'src/**/*Filter.js'
     ],
-    obj: 'src/assets/**/*.obj'
+    assets: 'src/assets/**/*.*'
 };
 
 var reload = browserSync.reload;
@@ -49,8 +49,8 @@ gulp.task('dev:images', function() {
       .pipe(gulp.dest('dist/images'));
 });
 
-gulp.task('dev:obj', function() {
-    return gulp.src(paths.obj)
+gulp.task('dev:assets', function() {
+    return gulp.src(paths.assets)
     .pipe(gulp.dest('dist/assets/'))
     .pipe(reload({stream: true}));
 });
@@ -129,7 +129,7 @@ gulp.task('lint:test', lint('test/spec/**/*.js', testLintOptions));
 gulp.task('clean', del.bind(null, ['dist']));
 
 gulp.task('serve', [
-    'dev:lib-scripts', 'dev:styles', 'dev:obj', 'dev:images',
+    'dev:lib-scripts', 'dev:styles', 'dev:assets', 'dev:images',
     'dev:main-scripts', 'dev:index-html', 'dev:views'],
     function() {
         browserSync({
