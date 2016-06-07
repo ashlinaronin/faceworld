@@ -24,7 +24,6 @@
             function _startLoading() {
                 LoadingManagerService.getLoadingManager().then(function(manager) {
                     objLoader = new THREE.OBJLoader(manager);
-
                     _createBigCactus(160);
                 });
             }

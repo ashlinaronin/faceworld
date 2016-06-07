@@ -12,7 +12,7 @@
             var synthPadDeferred = $q.defer();
 
             var rendererPromise = RendererService.getRenderer();
-            var renderer;
+            var canvas;
 
             var frequencyLabel, volumeLabel;
             var audioContext, oscillator, gainNode;
@@ -28,13 +28,11 @@
 
             function _setupEventListeners() {
                 rendererPromise.then(function(resolvedRenderer) {
-                    renderer = resolvedRenderer;
+                    canvas = resolvedRenderer.domElement;
                     _disableTouchDeviceScrolling();
 
-                    renderer.domElement.addEventListener('mousedown', _playSound);
-					renderer.domElement.addEventListener('touchstart', _playSound);
-                    renderer.domElement.addEventListener('mouseup', _stopSound);
-					renderer.domElement.addEventListener('touchend', _stopSound);
+					angular.element(canvas).on('mousedown touchstart', _playSound);
+					angular.element(canvas).on('mouseup touchend', _stopSound);
 					$document.on('mouseleave', _stopSound);
                 });
             }
@@ -54,13 +52,12 @@
                 gainNode.connect(audioContext.destination);
                 oscillator.connect(gainNode);
 
-                _updateFrequency(event);
+                _updateSound(event);
 
                 oscillator.start(0);
 
-                renderer.domElement.addEventListener('mousemove', _updateFrequency);
-				renderer.domElement.addEventListener('touchmove', _updateFrequency);
-                renderer.domElement.addEventListener('mouseout', _stopSound);
+				angular.element(canvas).on('mousemove touchmove', _updateSound);
+				angular.element(canvas).on('mouseout', _stopSound);
             }
 
             function _stopSound(event) {
@@ -68,25 +65,23 @@
 					oscillator.stop(0);
 				}
 
-
-                renderer.domElement.removeEventListener('mousemove', _updateFrequency);
-				renderer.domElement.removeEventListener('touchmove', _updateFrequency);
-                renderer.domElement.removeEventListener('mouseout', _stopSound);
+				angular.element(canvas).off('mousemove touchmove', _updateSound);
+				angular.element(canvas).off('mouseout', _stopSound);
             }
 
-            function _calculateNote(posX) {
+            function _calculatePitch(posX) {
                 var noteDifference = highNote - lowNote;
-                var noteOffset = (noteDifference / renderer.domElement.offsetWidth) * (posX - renderer.domElement.offsetLeft);
+                var noteOffset = (noteDifference / canvas.offsetWidth) * (posX - canvas.offsetLeft);
                 return lowNote + noteOffset;
             }
 
             function _calculateVolume(posY) {
-                var volumeLevel = 1 - (((100 / renderer.domElement.offsetHeight) * (posY - renderer.domElement.offsetTop)) / 100);
+                var volumeLevel = 1 - (((100 / canvas.offsetHeight) * (posY - canvas.offsetTop)) / 100);
                 return volumeLevel;
             }
 
-            function _calculateFrequency(x, y) {
-                var noteValue = _calculateNote(x);
+            function _calculateNote(x, y) {
+                var noteValue = _calculatePitch(x);
                 var volumeValue = _calculateVolume(y);
 
                 oscillator.frequency.value = noteValue;
@@ -96,12 +91,12 @@
                 console.log('vol: ', Math.floor(volumeValue * 100) + '%');
             }
 
-            function _updateFrequency(event) {
+            function _updateSound(event) {
                 if (event.type === 'mousedown' || event.type === 'mousemove') {
-                    _calculateFrequency(event.x, event.y);
+                    _calculateNote(event.x, event.y);
                 } else if (event.type === 'touchstart' || event.type === 'touchmove') {
                     var touch = event.touches[0];
-                    _calculateFrequency(touch.pageX, touch.pageY);
+                    _calculateNote(touch.pageX, touch.pageY);
                 }
             }
 
