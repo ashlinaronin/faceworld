@@ -9,13 +9,13 @@
             '$q', 'CameraService', 'PhotosphereService',
             'RendererService', 'WebcamService', 'AsteroidsService',
 			'LightsService', 'SpheresService', 'CactusesService',
-			'StarsService'
+			'StarsService', 'SynthPadService'
         ];
 
         function sceneDirective($q, CameraService, PhotosphereService,
                     RendererService, WebcamService, AsteroidsService,
 					LightsService, SpheresService, CactusesService,
-					StarsService) {
+					StarsService, SynthPadService) {
 
             var directive = {
                 link: link,
@@ -32,7 +32,6 @@
 
                 $q.all({
                     camera: CameraService.getCamera(),
-                    // photosphere: PhotosphereService.getPhotosphere(),
                     renderer: RendererService.getRenderer(),
 					pointLight: LightsService.getPointLight(),
 					ambientLight: LightsService.getAmbientLight(),
@@ -44,7 +43,6 @@
                     angular.extend(components, resolved);
 
                     addMouseMoveListener(components.renderer, components.camera, components.bigCactus);
-                    // components.photosphere.material.map = components.webcamVideoTexture;
 
 					components.scene.add(components.pointLight);
 					components.scene.add(components.ambientLight);
@@ -54,19 +52,12 @@
 
 					addTexturedObject(components.scene, components.bigCactus, components.webcamVideoTexture);
 
-					// addTexturedObjects(components.scene, components.asteroids, components.webcamVideoTexture);
-					// addTexturedObjects(components.scene, components.cactuses, components.webcamVideoTexture);
                     animate();
-					console.dir(components.scene);
+
+					SynthPadService.init();
                 });
             }
 
-			// function addTexturedObjects(scene, objects, texture) {
-			// 	objects.forEach(function(object) {
-			// 		addTexturedObject(scene, object, texture);
-			// 	});
-			// }
-			//
 			function addTexturedObject(scene, object, texture) {
 				object.traverse(function(child) {
 					if (child instanceof THREE.Mesh) {
@@ -88,9 +79,7 @@
             function addMouseMoveListener(renderer, camera, cactus) {
                 renderer.domElement.addEventListener('mousemove', function(e){
 					camera.rotation.x = Math.tan((window.innerHeight - e.x)/(window.innerHeight*2));
-					camera.position.z = 20*Math.tan((window.innerHeight/2 + e.x)/(window.innerHeight));
-					// camera.position.z = 20*Math.tan((window.innerHeight/2 + e.x)/(window.innerHeight)) + window.innerWidth/2;
-					// cactus.position.z = -1000*((window.innerHeight/2 + e.x)/(window.innerHeight/2)) + 2000;
+					camera.position.z = 20 * Math.tan((window.innerHeight/2 + e.x)/(window.innerHeight));
                 }, false);
             }
 
