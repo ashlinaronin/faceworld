@@ -24,6 +24,7 @@
 
             // @private
             function _init() {
+				var AudioContext = window.AudioContext || window.webkitAudioContext;
                 audioContext = new AudioContext();
                 _setupEventListeners();
             }
@@ -100,10 +101,6 @@
 			}
 
 			function _audioDecodingSuccess(buffer) {
-				// concertHallBuffer = buffer;
-				// soundSource = audioContext.createBufferSource();
-				// soundSource.buffer = concertHallBuffer;
-				// reverb.buffer = concertHallBuffer;
 				reverb.buffer = buffer;
 			}
 
@@ -111,15 +108,15 @@
 				console.log('Error decoding audio data', error.err);
 			}
 
-			function _connectOscillatorsToReverb() {
+			function _connectOscillatorsToNode(node) {
 				for (var i = 0; i < oscillators.length; i++) {
-					oscillators[i].connect(reverb);
+					oscillators[i].connect(node);
 				}
 			}
 
 			function _connectDevices() {
-				_connectOscillatorsToReverb();
-				reverb.connect(gainNode);
+				_connectOscillatorsToNode(gainNode);
+				// reverb.connect(gainNode);
                 gainNode.connect(audioContext.destination);
 			}
 
