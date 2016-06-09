@@ -5,9 +5,9 @@
 		.module('faceworld')
 		.factory('SynthPadService', SynthPad);
 
-        SynthPad.$inject = ['$q', '$document', '$window', 'RendererService'];
+        SynthPad.$inject = ['$q', '$document', '$window', 'RendererService', '$http'];
 
-		function SynthPad($q, $document, $window, RendererService) {
+		function SynthPad($q, $document, $window, RendererService, $http) {
 
             var synthPadDeferred = $q.defer();
 
@@ -15,7 +15,7 @@
             var canvas;
 
             var frequencyLabel, volumeLabel;
-            var audioContext, gainNode, panner;
+            var audioContext, gainNode, reverb;
 			var oscillators = [];
 
             // var lowNote = 261.63; // C4
@@ -67,6 +67,7 @@
 					type: 'triangle',
 					detuneSeed: 150
 				});
+				_createReverb();
                 gainNode = audioContext.createGain();
 			}
 
@@ -79,14 +80,46 @@
 				}
 			}
 
-			function _connectOscillatorsToGain() {
+			function _createReverb() {
+				var soundSource, concertHallBuffer;
+				reverb = audioContext.createConvolver();
+
+				// TODO: refactor with $http
+				var ajaxRequest = new XMLHttpRequest();
+				ajaxRequest.open('GET', 'assets/concert-crowd.ogg', true);
+				ajaxRequest.responseType = 'arraybuffer';
+				ajaxRequest.onload = function() {
+					var audioData = ajaxRequest.response;
+					audioContext.decodeAudioData(
+						audioData,
+						_audioDecodingSuccess,
+						_audioDecodingError
+					);
+				}
+				ajaxRequest.send();
+			}
+
+			function _audioDecodingSuccess(buffer) {
+				// concertHallBuffer = buffer;
+				// soundSource = audioContext.createBufferSource();
+				// soundSource.buffer = concertHallBuffer;
+				// reverb.buffer = concertHallBuffer;
+				reverb.buffer = buffer;
+			}
+
+			function _audioDecodingError(error) {
+				console.log('Error decoding audio data', error.err);
+			}
+
+			function _connectOscillatorsToReverb() {
 				for (var i = 0; i < oscillators.length; i++) {
-					oscillators[i].connect(gainNode);
+					oscillators[i].connect(reverb);
 				}
 			}
 
 			function _connectDevices() {
-				_connectOscillatorsToGain();
+				_connectOscillatorsToReverb();
+				reverb.connect(gainNode);
                 gainNode.connect(audioContext.destination);
 			}
 
@@ -112,12 +145,14 @@
 
             function _calculatePitch(posX) {
                 var noteDifference = highNote - lowNote;
-                var noteOffset = (noteDifference / canvas.offsetWidth) * (posX - canvas.offsetLeft);
+                var noteOffset = (noteDifference / canvas.offsetWidth) *
+						(posX - canvas.offsetLeft);
                 return lowNote + noteOffset;
             }
 
             function _calculateVolume(posY) {
-                var volumeLevel = 1 - (((100 / canvas.offsetHeight) * (posY - canvas.offsetTop)) / 100);
+                var volumeLevel = 1 - (((100 / canvas.offsetHeight) *
+						(posY - canvas.offsetTop)) / 100);
                 return volumeLevel;
             }
 
