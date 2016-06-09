@@ -5,9 +5,9 @@
 		.module('faceworld')
 		.factory('SynthPadService', SynthPad);
 
-        SynthPad.$inject = ['$q', '$document', 'RendererService'];
+        SynthPad.$inject = ['$q', '$document', '$window', 'RendererService'];
 
-		function SynthPad($q, $document, RendererService) {
+		function SynthPad($q, $document, $window, RendererService) {
 
             var synthPadDeferred = $q.defer();
 
@@ -15,9 +15,11 @@
             var canvas;
 
             var frequencyLabel, volumeLabel;
-            var audioContext, oscillator, gainNode;
+            var audioContext, gainNode, panner;
+			var oscillators = [];
 
-            var lowNote = 261.63; // C4
+            // var lowNote = 261.63; // C4
+			var lowNote = 140;
             var highNote = 493.88; // B4
 
             // @private
@@ -44,30 +46,69 @@
             }
 
             function _playSound(event) {
-                oscillator = audioContext.createOscillator();
-                gainNode = audioContext.createGain();
-
-                oscillator.type = 'triangle';
-
-                gainNode.connect(audioContext.destination);
-                oscillator.connect(gainNode);
-
+				_createDevices();
+				_connectDevices();
                 _updateSound(event);
-
-                oscillator.start(0);
+				_startOscillators();
 
 				angular.element(canvas).on('mousemove touchmove', _updateSound);
 				angular.element(canvas).on('mouseout', _stopSound);
             }
 
-            function _stopSound(event) {
-				if (oscillator) {
-					oscillator.stop(0);
+			function _startOscillators() {
+				for (var i = 0; i < oscillators.length; i++) {
+					oscillators[i].start(0);
 				}
+			}
+
+			function _createDevices() {
+				_createOscillators({
+					numberOfOscillators: 15,
+					type: 'triangle',
+					detuneSeed: 150
+				});
+                gainNode = audioContext.createGain();
+			}
+
+			function _createOscillators(options) {
+				for (var i = 0; i < options.numberOfOscillators; i++) {
+					var oscillator = audioContext.createOscillator();
+					oscillator.type = options.type;
+					oscillator.detune.value = Math.random() * options.detuneSeed;
+					oscillators.push(oscillator);
+				}
+			}
+
+			function _connectOscillatorsToGain() {
+				for (var i = 0; i < oscillators.length; i++) {
+					oscillators[i].connect(gainNode);
+				}
+			}
+
+			function _connectDevices() {
+				_connectOscillatorsToGain();
+                gainNode.connect(audioContext.destination);
+			}
+
+            function _stopSound(event) {
+				_stopOscillators();
+				_deleteOscillators();
 
 				angular.element(canvas).off('mousemove touchmove', _updateSound);
 				angular.element(canvas).off('mouseout', _stopSound);
             }
+
+			function _stopOscillators() {
+				if (oscillators.length) {
+					for (var i = 0; i < oscillators.length; i++) {
+						oscillators[i].stop(0);
+					}
+				}
+			}
+
+			function _deleteOscillators() {
+				oscillators = [];
+			}
 
             function _calculatePitch(posX) {
                 var noteDifference = highNote - lowNote;
@@ -84,12 +125,18 @@
                 var noteValue = _calculatePitch(x);
                 var volumeValue = _calculateVolume(y);
 
-                oscillator.frequency.value = noteValue;
+				_setOscillatorsFrequency(noteValue);
                 gainNode.gain.value = volumeValue;
 
                 console.log('freq: ', Math.floor(noteValue) + ' hz');
                 console.log('vol: ', Math.floor(volumeValue * 100) + '%');
             }
+
+			function _setOscillatorsFrequency(freq) {
+				for (var i = 0; i < oscillators.length; i++) {
+					oscillators[i].frequency.value = freq;
+				}
+			}
 
             function _updateSound(event) {
                 if (event.type === 'mousedown' || event.type === 'mousemove') {
