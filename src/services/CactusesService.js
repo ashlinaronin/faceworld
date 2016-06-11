@@ -70,20 +70,12 @@
 								var pixel = context.getImageData(x, y, 1, 1);
 								var color = new THREE.Color();
 								color.setRGB(
-									convertRGBRange(pixel.data[0]),
-									convertRGBRange(pixel.data[1]),
-									convertRGBRange(pixel.data[2])
+									  pixel.data[0] / 255,
+									  pixel.data[1] / 255,
+									  pixel.data[2] / 255
 								);
 								return color;
 						}
-
-						// http://stackoverflow.com/questions/14224535/scaling-between-two-number-ranges
-						function convertRGBRange( value ) {
-								var r1 = [0, 255];
-								var r2 = [0, 1];
-    						return ( value - r1[ 0 ] ) * ( r2[ 1 ] - r2[ 0 ] ) / ( r1[ 1 ] - r1[ 0 ] ) + r2[ 0 ];
-						}
-
 
             /* Return a random integer between min (inclusive) and max (inclusive).
             ** Thanks to MDN. */
