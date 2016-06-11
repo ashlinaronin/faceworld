@@ -43,7 +43,7 @@
                 // Add all the new resolved components to the components object
                 angular.extend(components, resolved);
 
-                addMouseMoveListener(components.renderer, components.camera, components.bigCactus);
+                // addMouseMoveListener(components.renderer, components.camera, components.bigCactus);
 
                 components.scene.add(components.pointLight);
                 components.scene.add(components.ambientLight);
@@ -75,7 +75,7 @@
             window.requestAnimationFrame(animate);
             WebcamService.drawVideoFrame();
             // StarsService.updateParticles();
-            components.bigCactus.rotation.y += 0.005;
+            // components.bigCactus.rotation.y += 0.005;
             components.renderer.render(components.scene, components.camera);
             streamer.update(components.bigCactus.geometry);
         }

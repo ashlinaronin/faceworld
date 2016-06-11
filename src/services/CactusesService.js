@@ -24,7 +24,7 @@
             function _startLoading() {
                 LoadingManagerService.getLoadingManager().then(function(manager) {
                     objLoader = new THREE.OBJLoader(manager);
-                    _createBigCactus(160);
+                    _createBigCactus(2);
                 });
             }
 
@@ -56,6 +56,8 @@
 											var childGeo = new THREE.Geometry().fromBufferGeometry(childMesh.geometry);
 											parentGeometry.merge(childGeo, childMesh.matrix);
 										});
+
+										parentGeometry.scale(size, size, size);
 
 										var material = new THREE.MeshBasicMaterial({ vertexColors: THREE.VertexColors });
 										var mesh = new THREE.Mesh(parentGeometry, material);
