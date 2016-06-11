@@ -17,12 +17,8 @@
             	side: THREE.BackSide
             });
 
-
-
-
-
             // Start loading objs as soon as we have a loading manager
-            _startLoading();
+            // _startLoading();
 
             function _startLoading() {
                 LoadingManagerService.getLoadingManager().then(function(manager) {
