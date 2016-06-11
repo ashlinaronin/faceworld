@@ -15,8 +15,9 @@
             var cactusPromises = [];
             var cactusMaterial = new THREE.MeshBasicMaterial({
             	color: 0xffffff
-            	// side: THREE.BackSide
             });
+
+						var numFaces = 552; // we know this to be true
 
             // Start loading objs as soon as we have a loading manager
             _startLoading();
@@ -24,7 +25,7 @@
             function _startLoading() {
                 LoadingManagerService.getLoadingManager().then(function(manager) {
                     objLoader = new THREE.OBJLoader(manager);
-                    _createBigCactus(2);
+                    _createBigCactus(1.7);
                 });
             }
 
@@ -38,7 +39,6 @@
 										});
 
 										parentGeometry.scale(size, size, size);
-										parentGeometry = _colorBigCactus(parentGeometry);
 
 										var material = new THREE.MeshBasicMaterial({ vertexColors: THREE.VertexColors });
 										var mesh = new THREE.Mesh(parentGeometry, material);
@@ -48,14 +48,40 @@
             }
 
 						function _colorBigCactus(cactus) {
-							cactus.faces.forEach(function(face) {
-								var color = new THREE.Color(0xffffff);
-								color.setHSL(Math.random(), Math.random(), Math.random());
-								face.color = color;
-							});
+								cactus.faces.forEach(function(face) {
+										var color = new THREE.Color(0xffffff);
+										color.setHSL(Math.random(), Math.random(), Math.random());
+										face.color = color;
+							  });
 
-							cactus.colorsNeedUpdate = true;
-							return cactus;
+							  cactus.colorsNeedUpdate = true;
+							  return cactus;
+						}
+
+						function _addWebcamColors(context, mesh) {
+								for (var i = 0; i < mesh.geometry.faces.length; i++) {
+									mesh.geometry.faces[i].color.copy(_pickPixel(context, i, i));
+								}
+
+								mesh.geometry.colorsNeedUpdate = true;
+						}
+
+						function _pickPixel(context, x, y) {
+								var pixel = context.getImageData(x, y, 1, 1);
+								var color = new THREE.Color();
+								color.setRGB(
+									convertRGBRange(pixel.data[0]),
+									convertRGBRange(pixel.data[1]),
+									convertRGBRange(pixel.data[2])
+								);
+								return color;
+						}
+
+						// http://stackoverflow.com/questions/14224535/scaling-between-two-number-ranges
+						function convertRGBRange( value ) {
+								var r1 = [0, 255];
+								var r2 = [0, 1];
+    						return ( value - r1[ 0 ] ) * ( r2[ 1 ] - r2[ 0 ] ) / ( r1[ 1 ] - r1[ 0 ] ) + r2[ 0 ];
 						}
 
 
@@ -68,7 +94,8 @@
             return {
                 getOneBigCactus: function() {
                     return bigCactusDeferred.promise;
-                }
+                },
+								addWebcamColors: _addWebcamColors
 						}
         }
 })();

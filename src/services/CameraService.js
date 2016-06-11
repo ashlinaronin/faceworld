@@ -11,7 +11,7 @@
 
             var cameraDeferred = $q.defer();
             var camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 100000);
-						camera.position.z = 10;
+						camera.position.z = 3;
 						camera.position.y = 3;
             cameraDeferred.resolve(camera);
 

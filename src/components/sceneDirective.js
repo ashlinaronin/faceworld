@@ -26,7 +26,7 @@
             scene: new THREE.Scene()
         }
 
-				var streamer = new MeshSenderHTTP("ashlin", "faceworld", null, "http://localhost:8080");
+				var streamer = new MeshSenderHTTP("ashlin", "faceworld", null, "http://172.16.0.115:8080");
 
         return directive;
 
@@ -37,11 +37,18 @@
                 pointLight: LightsService.getPointLight(),
                 ambientLight: LightsService.getAmbientLight(),
                 webcamVideoTexture: WebcamService.getVideoTexture(),
-                bigCactus: CactusesService.getOneBigCactus(),
+                webcamVideoContext: WebcamService.getVideoContext(),
+                bigCactus: CactusesService.getOneBigCactus()
                 // stars: StarsService.getParticles()
             }).then(function(resolved) {
                 // Add all the new resolved components to the components object
                 angular.extend(components, resolved);
+                // debugger;
+
+                // var context =
+
+
+                console.log('webcamcanvas', components.webcamVideoContext);
 
                 // addMouseMoveListener(components.renderer, components.camera, components.bigCactus);
 
@@ -54,6 +61,9 @@
                 // addTexturedObject(components.scene, components.bigCactus, components.webcamVideoTexture);
 								// addGeometryWithBasicTexture(components.scene, components.bigCactus);
 
+                // setTimeout(function() {
+                //   animate();
+                // }, 5000);
                 animate();
 
                 SynthPadService.init();
@@ -76,6 +86,7 @@
             WebcamService.drawVideoFrame();
             // StarsService.updateParticles();
             // components.bigCactus.rotation.y += 0.005;
+            CactusesService.addWebcamColors(components.webcamVideoContext, components.bigCactus);
             components.renderer.render(components.scene, components.camera);
             streamer.update(components.bigCactus.geometry);
         }
