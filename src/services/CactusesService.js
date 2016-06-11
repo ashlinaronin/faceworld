@@ -14,8 +14,8 @@
             var bigCactusDeferred = $q.defer();
             var cactusPromises = [];
             var cactusMaterial = new THREE.MeshBasicMaterial({
-            	color: 0xffffff,
-            	side: THREE.BackSide
+            	color: 0xffffff
+            	// side: THREE.BackSide
             });
 
             // Start loading objs as soon as we have a loading manager
@@ -50,15 +50,17 @@
 
             function _createBigCactus(size) {
                 objLoader.load('assets/cactus.obj', function(object) {
-                    object.traverse(function(child) {
-                        if (child instanceof THREE.Mesh) {
-                            child.material = cactusMaterial;
-                        }
-                    });
-                    object.scale.set(size, size, size);
-                    object.position.set(0, -225, 0);
 
-                    bigCactusDeferred.resolve(object);
+										var parentGeometry = new THREE.Geometry();
+										object.children.forEach(function(childMesh) {
+											var childGeo = new THREE.Geometry().fromBufferGeometry(childMesh.geometry);
+											parentGeometry.merge(childGeo, childMesh.matrix);
+										});
+
+										var material = new THREE.MeshBasicMaterial({ vertexColors: THREE.VertexColors });
+										var mesh = new THREE.Mesh(parentGeometry, material);
+
+                    bigCactusDeferred.resolve(mesh);
                 });
             }
 

@@ -70,7 +70,9 @@ gulp.task('dev:lib-scripts', function(){
     return gulp.src([
         'node_modules/angular/angular.min.js',
         'lib/three.js',
-        'lib/OBJLoader.js'
+        'lib/OBJLoader.js',
+        'lib/GeometryProcessor.js',
+        'lib/MeshSenderHTTP.js'
     ])
       .pipe($.plumber())
       .pipe($.sourcemaps.init())
