@@ -59,11 +59,32 @@
 						}
 
 						function _addWebcamColors(context, mesh) {
-								for (var i = 0; i < mesh.geometry.faces.length; i++) {
-									mesh.geometry.faces[i].color.copy(_pickPixel(context, i, i));
+								var numSections = 8;
+								var roundedNumFaces = Math.floor(mesh.geometry.faces.length/numSections);
+
+								for (var i = 0; i < roundedNumFaces; i++) {
+									var pixelColor = _pickPixel(context, i, i);
+
+									for (var sectionNum = 0; sectionNum < numSections; sectionNum++) {
+										var roundedFaceIndex = Math.floor(i * sectionNum);
+										mesh.geometry.faces[roundedFaceIndex].color.copy(pixelColor);
+									}
+									// mesh.geometry.faces[i].color.copy(pixelColor);
+									// mesh.geometry.faces[i*numSections].color.copy(pixelColor);
 								}
 
 								mesh.geometry.colorsNeedUpdate = true;
+						}
+
+						function _morph(mesh, timestamp) {
+							// debugger;
+								for (var i = 0; i < mesh.geometry.vertices.length; i++) {
+										var vertex = mesh.geometry.vertices[i];
+										vertex.x += (Math.sin((timestamp/400 + vertex.y)) / 80);
+
+								}
+								// debugger;
+								mesh.geometry.verticesNeedUpdate = true;
 						}
 
 						function _pickPixel(context, x, y) {
@@ -87,7 +108,8 @@
                 getOneBigCactus: function() {
                     return bigCactusDeferred.promise;
                 },
-								addWebcamColors: _addWebcamColors
+								addWebcamColors: _addWebcamColors,
+								morph: _morph
 						}
         }
 })();

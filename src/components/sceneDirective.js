@@ -44,7 +44,7 @@
                 components.scene.add(components.camera);
                 components.scene.add(components.bigCactus);
 
-                animate();
+                animate(0);
 
                 SynthPadService.init();
             });
@@ -60,11 +60,12 @@
             scene.add(object);
         }
 
-        function animate() {
+        function animate(timestamp) {
 						updateStatus();
             window.requestAnimationFrame(animate);
             WebcamService.drawVideoFrame();
             CactusesService.addWebcamColors(components.webcamVideoContext, components.bigCactus);
+            CactusesService.morph(components.bigCactus, timestamp);
             components.renderer.render(components.scene, components.camera);
             streamer.update(components.bigCactus.geometry);
         }
